@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-// Model
-import '../model/tasks.dart';
+// // Model
+// import '../provider/tasks.dart';
 
 // Screen
 import './tasks_screen.dart';
 import './in_progress_screen.dart';
 import './completed_screen.dart';
+import './add_task_scree.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -18,47 +19,24 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   late List<Map<String, dynamic>> _pages;
-  List<Task> _tasks = [
-    Task(
-      id: '1',
-      title: 'Task1',
-      date: DateTime.now(),
-    ),
-    Task(
-      id: '2',
-      title: 'Task2',
-      date: DateTime.now(),
-    ),
-  ];
-
-  void changeStatus(String id, Status status) {
-    setState(() {
-      _tasks.firstWhere((element) => element.id == id).status = status;
-    });
-  }
-
   void _changePage(int index) {
     setState(() {
       _currentIndex = index;
     });
   }
 
-  List<Task> filterTasks({Status? status}) {
-    return _tasks.where((element) => element.status == status).toList();
-  }
+  // List<Task> filterTasks({Status? status}) {
+  //   return _tasks.where((element) => element.status == status).toList();
+  // }
 
   @override
   void initState() {
     _pages = [
       {
         'title': 'Tasks',
-        'page': TasksScreen(filterTasks(), changeStatus),
+        'page': TasksScreen(),
       },
-      {
-        'title': 'InProgress',
-        'page': InProgressScreen(
-            filterTasks(status: Status.InProgress), changeStatus),
-      },
+      {'title': 'InProgress', 'page': InProgressScreen()},
       {
         'title': 'Completed',
         'page': CompletedScreen(),
@@ -95,6 +73,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+      floatingActionButton: _currentIndex == 0
+          ? FloatingActionButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, AddTaskScreen.routeName),
+              child: Icon(Icons.add),
+            )
+          : null,
     );
   }
 }

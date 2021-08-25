@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-import '../model/tasks.dart';
+import '../provider/tasks.dart';
 
 class TaskWidget extends StatelessWidget {
   final String id, title;
   final DateTime date;
+  final TimeOfDay time;
   final Status? status;
-  final Function onChange;
-  const TaskWidget(this.id, this.title, this.date, this.status, this.onChange,
+  const TaskWidget(this.id, this.title, this.date, this.time, this.status,
       {Key? key})
       : super(key: key);
 
@@ -21,6 +22,14 @@ class TaskWidget extends StatelessWidget {
       child: Container(
         color: Colors.white,
         child: ListTile(
+          leading: CircleAvatar(
+            radius: 30,
+            child: FittedBox(
+                child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('${time.format(context)}'),
+            )),
+          ),
           title: Text(title),
           // leading: CircleAvatar(
           //   child: Text('$date'),
@@ -33,20 +42,25 @@ class TaskWidget extends StatelessWidget {
           caption: 'Delete',
           color: Colors.red,
           icon: Icons.delete,
-          onTap: () => print('4'),
+          onTap: () =>
+              Provider.of<Tasks>(context, listen: false).removeTask(id),
         ),
-        IconSlideAction(
-          caption: 'In Progress',
-          color: Colors.black45,
-          icon: Icons.archive_outlined,
-          onTap: () => onChange(id, Status.InProgress),
-        ),
-        IconSlideAction(
-          caption: 'Completed',
-          color: Colors.blue,
-          icon: Icons.done_all,
-          onTap: () => print('3'),
-        ),
+        if (status != Status.InProgress)
+          IconSlideAction(
+            caption: 'In Progress',
+            color: Colors.black45,
+            icon: Icons.archive_outlined,
+            onTap: () => Provider.of<Tasks>(context, listen: false)
+                .changeStatus(id, Status.InProgress),
+          ),
+        if (status != Status.Completed)
+          IconSlideAction(
+            caption: 'Completed',
+            color: Colors.blue,
+            icon: Icons.done_all,
+            onTap: () => Provider.of<Tasks>(context, listen: false)
+                .changeStatus(id, Status.Completed),
+          ),
       ],
     );
   }
