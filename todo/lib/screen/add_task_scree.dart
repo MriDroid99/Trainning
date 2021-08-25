@@ -17,6 +17,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   var _titleController = TextEditingController();
   var _timeController = TextEditingController();
   var _dateController = TextEditingController();
+
+  DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +53,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   initialTime: TimeOfDay.now(),
                 ).then(
                   (value) => setState(
-                    () => _timeController.text = value?.format(context) ?? '',
+                    () {
+                      _selectedTime = value ?? TimeOfDay.now();
+                      _timeController.text = value?.format(context) ?? '';
+                    },
                   ),
                 );
               },
@@ -75,8 +81,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     Duration(days: 7),
                   ),
                 ).then(
-                  (value) => setState(() => _dateController.text =
-                      DateFormat.yMMMd().format(value ?? DateTime.now())),
+                  (value) => setState(() {
+                    _selectedDate = value ?? DateTime.now();
+                    _dateController.text =
+                        DateFormat.yMMMd().format(value ?? DateTime.now());
+                  }),
                 );
               },
             ),
@@ -84,12 +93,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 onPressed: () {
                   Provider.of<Tasks>(context, listen: false).addTask(
                     _titleController.text,
-                    DateFormat('yMMMd').parse(_dateController.text),
-                    TimeOfDay(
-                      hour: int.parse(_timeController.text.split(":")[0]),
-                      minute: int.parse(
-                          _timeController.text.split(":").join().split(' ')[0]),
-                    ),
+                    _selectedDate,
+                    _selectedTime,
                   );
                   Navigator.pop(context);
                 },
