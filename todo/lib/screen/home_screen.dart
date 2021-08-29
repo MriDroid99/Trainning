@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-// // Model
-// import '../provider/tasks.dart';
+// Provider
+import '../provider/tasks.dart';
 
 // Screen
 import './tasks_screen.dart';
@@ -51,7 +52,17 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(_pages[_currentIndex]['title']),
       ),
-      body: _pages[_currentIndex]['page'],
+      body: FutureBuilder(
+        future: Provider.of<Tasks>(context).getData(),
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return _pages[_currentIndex]['page'];
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _changePage,

@@ -72,21 +72,25 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 labelText: 'Date',
               ),
               readOnly: true,
-              onTap: () {
-                showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(
-                    Duration(days: 7),
-                  ),
-                ).then(
-                  (value) => setState(() {
-                    _selectedDate = value ?? DateTime.now();
-                    _dateController.text =
-                        DateFormat.yMMMd().format(value ?? DateTime.now());
-                  }),
-                );
+              onTap: () async {
+                setState(() async {
+                  _selectedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(
+                          Duration(days: 7),
+                        ),
+                      ) ??
+                      DateTime.now();
+                });
+                // .then(
+                //   (value) => setState(() {
+                //     _selectedDate = value ?? DateTime.now();
+                //     _dateController.text =
+                //         DateFormat.yMMMd().format(value ?? DateTime.now());
+                //   }),
+                // );
               },
             ),
             ElevatedButton(
