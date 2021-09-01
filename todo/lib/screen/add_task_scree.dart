@@ -14,17 +14,42 @@ class AddTaskScreen extends StatefulWidget {
 }
 
 class _AddTaskScreenState extends State<AddTaskScreen> {
+  bool _isFirst = true;
+  var _args;
   var _titleController = TextEditingController();
   var _timeController = TextEditingController();
   var _dateController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
+
+  @override
+  void didChangeDependencies() {
+    if (_isFirst) {
+      _args = ModalRoute.of(context)!.settings.arguments;
+      print(_args);
+      _isFirst = false;
+    }
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
+    Task? task;
+    if (_args != null) {
+      task = Provider.of<Tasks>(context).findById(_args['id']);
+      _titleController.text = task.title;
+      _timeController.text = task.time.format(context);
+      _dateController.text = DateFormat.yMMMd().format(task.date);
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Task'),
+        title: Text(_args == null ? 'Add Task' : 'Edit Task'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -72,37 +97,40 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 labelText: 'Date',
               ),
               readOnly: true,
-              onTap: () async {
-                setState(() async {
-                  _selectedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(
-                          Duration(days: 7),
-                        ),
-                      ) ??
-                      DateTime.now();
-                });
-                // .then(
-                //   (value) => setState(() {
-                //     _selectedDate = value ?? DateTime.now();
-                //     _dateController.text =
-                //         DateFormat.yMMMd().format(value ?? DateTime.now());
-                //   }),
-                // );
+              onTap: () {
+                showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(
+                    Duration(days: 7),
+                  ),
+                ).then(
+                  (value) => setState(() {
+                    _selectedDate = value ?? DateTime.now();
+                    _dateController.text =
+                        DateFormat.yMMMd().format(value ?? DateTime.now());
+                  }),
+                );
               },
             ),
             ElevatedButton(
                 onPressed: () {
-                  Provider.of<Tasks>(context, listen: false).addTask(
-                    _titleController.text,
-                    _selectedDate,
-                    _selectedTime,
-                  );
+                  _args == null
+                      ? Provider.of<Tasks>(context, listen: false).addTask(
+                          _titleController.text,
+                          _selectedDate,
+                          _selectedTime,
+                        )
+                      : Provider.of<Tasks>(context, listen: false).updateTask(
+                          _args['id'],
+                          _titleController.text,
+                          _selectedDate,
+                          _selectedTime,
+                        );
                   Navigator.pop(context);
                 },
-                child: Text('Add Task'))
+                child: Text(_args == null ? 'Add Task' : 'Edit Task'))
           ],
         ),
       ),
